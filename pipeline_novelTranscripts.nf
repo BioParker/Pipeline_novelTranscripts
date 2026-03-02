@@ -114,7 +114,8 @@ process get_novel_transcripts {
         """
         Rscript '$projectDir'/scripts/getNovelTranscripts.R -c '$ce_vs_ref' \
                                                             -m '$models_gtf' \
-                                                            -p '$iso_psi'
+                                                            -p '$iso_psi' \
+                                                            -t '${params.model_tpms}'
         """
 }
 

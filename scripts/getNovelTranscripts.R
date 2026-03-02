@@ -5,7 +5,9 @@ option_list = list(
   make_option(c("-m", "--models"), type="character", default="NULL", 
               help="transcript models gtf from IsoQuant", metavar="character"),
   make_option(c("-p", "--psi"), type="character", default="NULL",    
-              help="transcript level psi file from suppa psiPerIsoform on models gtf", metavar="character")
+              help="transcript level psi file from suppa psiPerIsoform on models gtf", metavar="character"),
+  make_option(c("-t", "--tpms"), type="character", default="NULL",    
+              help="model transcript tpms from IsoQuant", metavar="character")
 )
 opt_parser = OptionParser(option_list=option_list)
 opt = parse_args(opt_parser)
@@ -73,11 +75,18 @@ unovel_transcripts <- unovel_cassettes %>%
                       summarise(cassette_type = paste(cassette_type,collapse = ";"), n_cassettes = n()) %>%
                       ungroup()
 
-# reading in suppa transcript psi results + appending to novel transcript table
+# reading in suppa transcript psi results + appending relevant values to novel transcript table
 
 suppa_tpsi <- read.delim(opt$psi)
-suppa_tpsi <- suppa_tpsi %>% separate_wider_delim(cols=X.feature_id, delim=";", names=c("gene_id","transcript_id"))
-unovel_transcripts$transcript_psi <- suppa_tpsi$TPM[match(unovel_transcripts$transcript_id, suppa_tpsi$transcript_id)]
+colnames(suppa_tpsi) <- c("transcript_id","psi")
+suppa_tpsi <- suppa_tpsi %>% separate_wider_delim(cols=transcript_id, delim=";", names=c("gene_id","transcript_id"))
+unovel_transcripts$transcript_psi <- suppa_tpsi$psi[match(unovel_transcripts$transcript_id, suppa_tpsi$transcript_id)]
+
+# reading in model transcript tpms and appending relevant values to novel transcript table
+
+tpms <- read.delim(opt$tpms)
+colnames(tpms) <- c("transcript_id","tpm")
+unovel_transcripts$tpm <- tpms$tpm[match(unovel_transcripts$transcript_id, tpms$transcript_id)]
 
 #writing exon-centric and transcript-centrix outputs
 
